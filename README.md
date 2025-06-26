@@ -93,9 +93,9 @@ Para confirmar que la integración funciona correctamente:
 
 - Consulta la [documentación oficial de la API de Chatwoot](https://www.chatwoot.com/developers/api/) para más detalles sobre los endpoints y parámetros.
 - Asegúrate de que el canal WhatsApp esté completamente configurado en Chatwoot para permitir la sincronización de mensajes.
-- Para contribuir al proyecto, abre un issue o envía un pull request en el repositorio.
 
 ## Configuración de Ejemplo del `.env`
+- Puedes guiarte del archivo .env.producton estan las credenciales personalizadas para el proyecto.
 
 | Variable                | Descripción                              | Valor de Ejemplo       |
 |-------------------------|------------------------------------------|------------------------|
