@@ -95,7 +95,7 @@ Para confirmar que la integración funciona correctamente:
 - Asegúrate de que el canal WhatsApp esté completamente configurado en Chatwoot para permitir la sincronización de mensajes.
 
 ## Configuración de Ejemplo del `.env`
-- Puedes guiarte del archivo .env.producton estan las credenciales personalizadas para el proyecto.
+- Puedes guiarte del archivo .env.production estan las credenciales personalizadas para el proyecto.
 
 | Variable                | Descripción                              | Valor de Ejemplo       |
 |-------------------------|------------------------------------------|------------------------|
