@@ -1,140 +1,104 @@
-<img src="./.github/screenshots/header.png#gh-light-mode-only" width="100%" alt="Header light mode"/>
-<img src="./.github/screenshots/header-dark.png#gh-dark-mode-only" width="100%" alt="Header dark mode"/>
+# Integración con Chatwoot
 
-___
+Este repositorio contiene la integración de un bot con [Chatwoot](https://www.chatwoot.com/), una plataforma de mensajería y soporte al cliente, utilizando un entorno basado en Docker. La integración permite procesar y almacenar mensajes de WhatsApp en Chatwoot. A continuación, se detallan los pasos para instalar, configurar y verificar el proyecto.
 
-# Chatwoot
+## Requisitos Previos
 
-The modern customer support platform, an open-source alternative to Intercom, Zendesk, Salesforce Service Cloud etc.
+Antes de comenzar, asegúrate de contar con lo siguiente:
 
-<p>
-  <a href="https://codeclimate.com/github/chatwoot/chatwoot/maintainability"><img src="https://api.codeclimate.com/v1/badges/e6e3f66332c91e5a4c0c/maintainability" alt="Maintainability"></a>
-  <img src="https://img.shields.io/circleci/build/github/chatwoot/chatwoot" alt="CircleCI Badge">
-    <a href="https://hub.docker.com/r/chatwoot/chatwoot/"><img src="https://img.shields.io/docker/pulls/chatwoot/chatwoot" alt="Docker Pull Badge"></a>
-  <a href="https://hub.docker.com/r/chatwoot/chatwoot/"><img src="https://img.shields.io/docker/cloud/build/chatwoot/chatwoot" alt="Docker Build Badge"></a>
-  <img src="https://img.shields.io/github/commit-activity/m/chatwoot/chatwoot" alt="Commits-per-month">
-  <a title="Crowdin" target="_self" href="https://chatwoot.crowdin.com/chatwoot"><img src="https://badges.crowdin.net/e/37ced7eba411064bd792feb3b7a28b16/localized.svg"></a>
-  <a href="https://discord.gg/cJXdrwS"><img src="https://img.shields.io/discord/647412545203994635" alt="Discord"></a>
-  <a href="https://status.chatwoot.com"><img src="https://img.shields.io/endpoint?url=https%3A%2F%2Fraw.githubusercontent.com%2Fchatwoot%2Fstatus%2Fmaster%2Fapi%2Fchatwoot%2Fuptime.json" alt="uptime"></a>
-  <a href="https://status.chatwoot.com"><img src="https://img.shields.io/endpoint?url=https%3A%2F%2Fraw.githubusercontent.com%2Fchatwoot%2Fstatus%2Fmaster%2Fapi%2Fchatwoot%2Fresponse-time.json" alt="response time"></a>
-  <a href="https://artifacthub.io/packages/helm/chatwoot/chatwoot"><img src="https://img.shields.io/endpoint?url=https://artifacthub.io/badge/repository/artifact-hub" alt="Artifact HUB"></a>
-</p>
+- **Docker y Docker Compose instalados**: Necesarios para ejecutar los contenedores de la aplicación.
+- **Acceso a la interfaz de administración de Chatwoot**: Requerido para generar claves API y configurar inboxes.
+- **Archivo `.env` con variables de entorno**: Consulta el archivo `.env.example` en el repositorio como referencia.
 
+## Instrucciones de Instalación y Configuración
 
-<p>
-  <a href="https://heroku.com/deploy?template=https://github.com/chatwoot/chatwoot/tree/master" alt="Deploy to Heroku">
-     <img width="150" alt="Deploy" src="https://www.herokucdn.com/deploy/button.svg"/>
-  </a>
-  <a href="https://marketplace.digitalocean.com/apps/chatwoot?refcode=f2238426a2a8" alt="Deploy to DigitalOcean">
-     <img width="200" alt="Deploy to DO" src="https://www.deploytodo.com/do-btn-blue.svg"/>
-  </a>
-</p>
+### 1. Levantar el Proyecto
 
-<img src="./.github/screenshots/dashboard.png#gh-light-mode-only" width="100%" alt="Chat dashboard dark mode"/>
-<img src="./.github/screenshots/dashboard-dark.png#gh-dark-mode-only" width="100%" alt="Chat dashboard"/>
+Para iniciar el proyecto en modo producción, ejecuta el siguiente comando con el archivo de configuración de Docker Compose:
 
----
+```bash
+docker-compose -f docker-compose.production.yaml up -d
+```
 
-Chatwoot is the modern, open-source, and self-hosted customer support platform designed to help businesses deliver exceptional customer support experience. Built for scale and flexibility, Chatwoot gives you full control over your customer data while providing powerful tools to manage conversations across channels.
+- **Explicación**:  
+  El parámetro `-d` ejecuta los contenedores en segundo plano, liberando el terminal. Asegúrate de que el archivo `docker-compose.production.yaml` esté ubicado en el directorio raíz del proyecto.
 
-### ✨ Captain – AI Agent for Support
+### 2. Ejecutar Migraciones
 
-Supercharge your support with Captain, Chatwoot’s AI agent. Captain helps automate responses, handle common queries, and reduce agent workload—ensuring customers get instant, accurate answers. With Captain, your team can focus on complex conversations while routine questions are resolved automatically. Read more about Captain [here](https://chwt.app/captain-docs).
+Una vez que los contenedores estén en ejecución, realiza las migraciones necesarias para preparar la base de datos de Chatwoot:
 
-### 💬 Omnichannel Support Desk
+```bash
+docker-compose exec rails bundle exec rails db:chatwoot_prepare
+```
 
-Chatwoot centralizes all customer conversations into one powerful inbox, no matter where your customers reach out from. It supports live chat on your website, email, Facebook, Instagram, Twitter, WhatsApp, Telegram, Line, SMS etc.
+- **Explicación**:  
+  Este comando ejecuta las migraciones dentro del contenedor `rails`, configurando la base de datos para que Chatwoot funcione correctamente. Si encuentras errores, revisa los logs con:
+  ```bash
+  docker-compose logs
+  ```
 
-### 📚 Help center portal
+### 3. Configurar Claves de Acceso (API Keys)
 
-Publish help articles, FAQs, and guides through the built-in Help Center Portal. Enable customers to find answers on their own, reduce repetitive queries, and keep your support team focused on more complex issues.
+Para conectar aplicaciones externas (como WhatsApp) con Chatwoot a través de su API, sigue estos pasos:
 
-### 🗂️ Other features
+1. **Accede a la Interfaz de Chatwoot**:  
+   Inicia sesión en tu instancia de Chatwoot (por ejemplo, `https://chatwoot.ghlingenieros.com`).
 
-#### Collaboration & Productivity
+2. **Generar un Access Token**:  
+   - Dirígete a **Profile > Settings**.  
+   - En la sección **Access Token**, haz clic en generar una nueva clave.  
+   - Copia el token generado (este será tu `CHATWOOT_API_KEY`) y guárdalo de forma segura.
+  
+     ![Image](https://github.com/user-attachments/assets/68d8abb1-441e-4782-a516-822fcdf1f4e0)
 
-- Private Notes and @mentions for internal team discussions.
-- Labels to organize and categorize conversations.
-- Keyboard Shortcuts and a Command Bar for quick navigation.
-- Canned Responses to reply faster to frequently asked questions.
-- Auto-Assignment to route conversations based on agent availability.
-- Multi-lingual Support to serve customers in multiple languages.
-- Custom Views and Filters for better inbox organization.
-- Business Hours and Auto-Responders to manage response expectations.
-- Teams and Automation tools for scaling support workflows.
-- Agent Capacity Management to balance workload across the team.
+3. **Configurar un Inbox para WhatsApp**:  
+   - Ve a **Settings > Inboxes**.  
+   - Haz clic en **Add Inbox** y selecciona el canal **WhatsApp**.  
+   - Ingresa los detalles necesarios, como las credenciales de la API de WhatsApp Business o la integración con un proveedor como Twilio.  
+   - Una vez creado, anota el `inbox_id` (visible en la URL o en la configuración del inbox, por ejemplo, `inbox/2`).
+  
+     ![Image](https://github.com/user-attachments/assets/1cce5e96-4a37-4d4f-b621-1c9e5d22aa8d)
 
-#### Customer Data & Segmentation
-- Contact Management with profiles and interaction history.
-- Contact Segments and Notes for targeted communication.
-- Campaigns to proactively engage customers.
-- Custom Attributes for storing additional customer data.
-- Pre-Chat Forms to collect user information before starting conversations.
+4. **Obtener los Identificadores Necesarios**:  
+   - El `account_id` se deriva de la estructura de la URL de la API (por ejemplo, `accounts/1` indica `account_id: 1`).  
+   - Combina `account_id` y `inbox_id` para referencias futuras (por ejemplo, `accounts/1/inbox/2`).
 
-#### Integrations
-- Slack Integration to manage conversations directly from Slack.
-- Dialogflow Integration for chatbot automation.
-- Dashboard Apps to embed internal tools within Chatwoot.
-- Shopify Integration to view and manage customer orders right within Chatwoot.
-- Use Google Translate to translate messages from your customers in realtime.
-- Create and manage Linear tickets within Chatwoot.
+5. **Actualizar el Archivo `.env`**:  
+   Edita el archivo `.env` en el directorio raíz con las siguientes variables:
+   ```bash
+   CHATWOOT_API_KEY=tu_access_token_generado
+   CHATWOOT_ACCOUNT_ID=1
+   INBOX_ID=2
+   WHATSAPP_VERIFY_TOKEN=mi_token_secreto
+   ```
+   Guarda los cambios y reinicia los contenedores:
+   ```bash
+   docker-compose -f docker-compose.production.yaml restart
+   ```
 
-#### Reports & Insights
-- Live View of ongoing conversations for real-time monitoring.
-- Conversation, Agent, Inbox, Label, and Team Reports for operational visibility.
-- CSAT Reports to measure customer satisfaction.
-- Downloadable Reports for offline analysis and reporting.
+## Verificación
 
+Para confirmar que la integración funciona correctamente:
 
-## Documentation
+- Envía un mensaje de prueba desde WhatsApp al número asociado con el inbox configurado.
+- Inicia sesión en Chatwoot y navega a **Inboxes > botGhl** (o el nombre del inbox correspondiente a `inbox_id: 2`).
+- Verifica que el mensaje aparezca en el hilo de conversación del contacto (por ejemplo, `+51993620749`).
 
-Detailed documentation is available at [chatwoot.com/help-center](https://www.chatwoot.com/help-center).
+## Solución de Problemas
 
-## Translation process
+- **Duplicación de Conversaciones**:  
+  Si se crean múltiples conversaciones para el mismo contacto, verifica que el `INBOX_ID` en `.env` coincida con el inbox usado y que las conversaciones no estén marcadas como cerradas en Chatwoot.
 
-The translation process for Chatwoot web and mobile app is managed at [https://translate.chatwoot.com](https://translate.chatwoot.com) using Crowdin. Please read the [translation guide](https://www.chatwoot.com/docs/contributing/translating-chatwoot-to-your-language) for contributing to Chatwoot.
+## Notas Adicionales
 
-## Branching model
+- Consulta la [documentación oficial de la API de Chatwoot](https://www.chatwoot.com/developers/api/) para más detalles sobre los endpoints y parámetros.
+- Asegúrate de que el canal WhatsApp esté completamente configurado en Chatwoot para permitir la sincronización de mensajes.
+- Para contribuir al proyecto, abre un issue o envía un pull request en el repositorio.
 
-We use the [git-flow](https://nvie.com/posts/a-successful-git-branching-model/) branching model. The base branch is `develop`.
-If you are looking for a stable version, please use the `master` or tags labelled as `v1.x.x`.
+## Configuración de Ejemplo del `.env`
 
-## Deployment
-
-### Heroku one-click deploy
-
-Deploying Chatwoot to Heroku is a breeze. It's as simple as clicking this button:
-
-[![Deploy](https://www.herokucdn.com/deploy/button.svg)](https://heroku.com/deploy?template=https://github.com/chatwoot/chatwoot/tree/master)
-
-Follow this [link](https://www.chatwoot.com/docs/environment-variables) to understand setting the correct environment variables for the app to work with all the features. There might be breakages if you do not set the relevant environment variables.
-
-
-### DigitalOcean 1-Click Kubernetes deployment
-
-Chatwoot now supports 1-Click deployment to DigitalOcean as a kubernetes app.
-
-<a href="https://marketplace.digitalocean.com/apps/chatwoot?refcode=f2238426a2a8" alt="Deploy to DigitalOcean">
-  <img width="200" alt="Deploy to DO" src="https://www.deploytodo.com/do-btn-blue.svg"/>
-</a>
-
-### Other deployment options
-
-For other supported options, checkout our [deployment page](https://chatwoot.com/deploy).
-
-## Security
-
-Looking to report a vulnerability? Please refer our [SECURITY.md](./SECURITY.md) file.
-
-## Community
-
-If you need help or just want to hang out, come, say hi on our [Discord](https://discord.gg/cJXdrwS) server.
-
-## Contributors
-
-Thanks goes to all these [wonderful people](https://www.chatwoot.com/docs/contributors):
-
-<a href="https://github.com/chatwoot/chatwoot/graphs/contributors"><img src="https://opencollective.com/chatwoot/contributors.svg?width=890&button=false" /></a>
-
-
-*Chatwoot* &copy; 2017-2025, Chatwoot Inc - Released under the MIT License.
+| Variable                | Descripción                              | Valor de Ejemplo       |
+|-------------------------|------------------------------------------|------------------------|
+| `CHATWOOT_API_KEY`      | Clave API para acceso a Chatwoot         | `tu_access_token`      |
+| `CHATWOOT_ACCOUNT_ID`   | ID de la cuenta desde la URL de Chatwoot | `1`                    |
+| `INBOX_ID`              | ID del inbox para el canal WhatsApp      | `2`                    |
